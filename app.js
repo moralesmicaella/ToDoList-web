@@ -1,94 +1,92 @@
-const express = require("express")
-const bodyParser = require("body-parser")
-const db = require(__dirname + "/db.js")
-const { Item, ItemModel } = require(__dirname + "/models/Item.js")
-const { List, ListModel } = require(__dirname + "/models/List.js")
+const express = require("express");
+const bodyParser = require("body-parser");
 
-const app = express()
+const db = require(__dirname + "/db.js");
 
-const port = process.env.PORT || 3000
+const ListManager = require(__dirname + "/models/List.js");
+const List = ListManager.List;
+
+const UserManager = require(__dirname + "/models/User.js");
+const User = UserManager.User;
+
+const app = express();
+
+const port = process.env.PORT || 3000;
 
 db.connect();
-
-let todoLists = []
-let items = []
-
-ListModel.find()
-.then((lists) => {
-  if (lists.length === 0) {
-    const defaultList = new List("Today");
-    defaultList.save()
-  }
-})
 
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({
   extended: true
-}))
+}));
+
+UserManager.configure(app);
 
 app.set("view engine", "ejs");
 
-app.get("/", (req, res) => {
-  ListModel.find()
-  .then((lists) => {
-    todoLists = [];
-    lists.forEach((list) => {
-      todoLists.push(list);
-    })
+app.route("/")
+  .get((req, res) => {
+    if (req.isAuthenticated()) {
+      ListManager.showAllLists(req, res);
+    } else {
+      res.redirect("/login");
+    }
   })
-  .then(() => {
-    res.render("home", {todoLists: todoLists})
+
+  .post((req, res) => {
+    ListManager.addNewList(req, res);
+  });
+
+app.route("/login")
+  .get((req, res) => {
+    res.render("login", {
+      error: false,
+      errorMessage: ""
+    });
   })
+
+  .post((req, res) => {
+    UserManager.login(req, res);
+  });
+
+app.get("/failed-login", (req, res) => {
+  res.render("login", {
+    error: true,
+    errorMessage: "The username or password is incorrect. Please try again"
+  });
 })
 
-app.post("/add-list", (req, res) => {
-  const list = new List(req.body.listName)
-  list.save()
-  .then(() => {
-    res.redirect("/")
-  })
+app.post("/signup", (req, res) => {
+  UserManager.signUp(req, res);
+});
+
+app.get("/logout", (req, res) => {
+  req.logout();
+  res.redirect("/");
 });
 
 app.post("/delete-list", (req, res) => {
-  const listID = req.body.button
-  ListModel.findByIdAndRemove(listID)
-  .then(() => {
-    res.redirect("/")
-  })
-})
+  ListManager.deleteList(req, res);
+});
 
 app.post("/go-to-list", (req, res) => {
-  const list = req.body
-  res.redirect("/" + list.title)
-})
+  const list = req.body;
+  res.redirect("/" + list.title);
+});
 
-app.get("/:listTitle", (req, res) => {
-  const title = req.params.listTitle
-  ListModel.findOne({name: title})
-  .then((list) => {
-    res.render("list", {list: list})
+app.route("/:listTitle")
+  .get((req, res) => {
+    ListManager.showSelectedList(req, res);
   })
-})
 
-app.post("/:listTitle/add-item", (req, res) => {
-  const listID = req.body.listID
-  const itemName = req.body.itemName
-  ListModel.findByIdAndUpdate(listID, {$push: {items: new Item(itemName)}})
-  .then(() => {
-    res.redirect("/" + req.params.listTitle)
-  })
-})
+  .post((req, res) => {
+    ListManager.addNewItem(req, res);
+  });
 
 app.post("/:listTitle/delete-item", (req, res) => {
-  const listID = req.body.listID
-  const itemID = req.body.itemID
-
-  ListModel.findByIdAndUpdate(listID, {$pull: {items: {_id: itemID}}})
-  .then(() => {
-    res.redirect("/" + req.params.listTitle)
-  })
-})
+  ListManager.deleteItem(req, res);
+});
 
 app.listen(port, () => {
-  console.log("Server started on port " + port)
-})
+  console.log("Server started on port " + port);
+});

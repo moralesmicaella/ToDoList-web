@@ -2,7 +2,10 @@
 
 <body>
   <div class="box" id="heading">
-    <h1><a href="/" ><i class="fas fa-home"></i></a>  <%= list.name %></h1>
+    <h1>
+      <a href="/" ><i class="fas fa-home"></i></a>
+      <%= list.name %>
+    </h1>
   </div>
 
   <div class="box">
@@ -16,7 +19,7 @@
     </form>
     <% }); %>
 
-    <form class="add" action="/<%= list.name %>/add-item" method="post">
+    <form class="add" action="/<%= list.name %>" method="post">
       <input type="text" name="itemName" placeholder="New Item" autocomplete="off">
       <button type="submit" name="listID" value="<%= list._id %>"><i class="fas fa-plus"></i></button>
     </form>

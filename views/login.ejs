@@ -1,0 +1,27 @@
+<%- include("header") -%>
+
+<div class="box login">
+  <form method="post">
+    <label for="username">Username</label>
+    <input class="login" type="email" name="username">
+
+    <label for="password">Password</label>
+    <input class="login" type="password" name="password" onfocus="this.value=''">
+
+    <% if (error === true) { %>
+      <p class="error-message"><i class="fas fa-exclamation-circle"></i> <%= errorMessage %>!</p>
+    <% } %>
+
+    <button class="login-btn" type="submit" formaction="/login">Log in</button>
+    <button class="signup-btn" type="submit" name="button" formaction="/signup">Sign up</button>
+  </form>
+</div>
+
+<script type="text/javascript">
+  function removeError() {
+    error = false;
+  }
+</script>
+
+
+<%- include("footer") -%>

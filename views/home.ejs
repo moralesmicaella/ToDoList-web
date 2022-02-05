@@ -2,7 +2,10 @@
 
 <body>
   <div class="box" id="heading">
-    <h1>To Do Lists</h1>
+    <h1>
+      To Do Lists
+      <a href="/logout"><i class="fas fa-sign-out-alt"></i></i></a>
+    </h1>
   </div>
 
   <div class="box">
@@ -18,7 +21,7 @@
     </form>
     <% }) %>
 
-    <form class="add" action="/add-list" method="post">
+    <form class="add" action="/" method="post">
       <input type="text" name="listName" placeholder="New List" autocomplete="off">
       <button type="submit"><i class="fas fa-plus"></i></button>
     </form>
